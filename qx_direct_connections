@@ -8,6 +8,7 @@ DOMAIN,opzzy.kefsww.com,DIRECT
 
 # hotmail
 DOMAIN,m.hotmail.com,DIRECT
+DOMAIN,*.microsoftonline.com,DIRECT
 
 # 苹果服务
 DOMAIN,*.apple.com,DIRECT
