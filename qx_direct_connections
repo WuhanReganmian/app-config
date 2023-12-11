@@ -1,5 +1,9 @@
 # 自用qx直连
 
+# 快猫
+HOST-KEYWORD, yuheng, DIRECT
+IP-CIDR, 172.233.81.206/24, DIRECT
+
 # 悦色视频
 DOMAIN,ys.huajibh.com,DIRECT
 
