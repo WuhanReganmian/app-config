@@ -1,11 +1,14 @@
 # 自用qx直连
 
+#哔咔
+DOMAIN-KEYWORD, yuheng, DIRECT
+DOMAIN-KEYWORD, yqc-premium, DIRECT
+
 # last origin
 DOMAIN-SUFFIX,unity3d.com,DIRECT
 DOMAIN-SUFFIX,appsflyer.com,DIRECT
 
 # 快猫
-HOST-KEYWORD, yuheng, DIRECT
 IP-CIDR, 172.233.81.206/24, DIRECT
 
 # 悦色视频
