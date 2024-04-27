@@ -1,5 +1,8 @@
 # 自用qx直连
 
+# 什么值得买
+DOMAIN-SUFFIX, smzdm.com, DIRECT
+
 #哔咔
 DOMAIN-KEYWORD, yuheng, DIRECT
 DOMAIN-KEYWORD, yqc-premium, DIRECT
