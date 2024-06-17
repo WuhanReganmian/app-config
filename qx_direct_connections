@@ -1,5 +1,8 @@
 # 自用qx直连
 
+# 神州数码
+DOMAIN-SUFFIX, digitalchina.com, DIRECT
+
 # 什么值得买
 DOMAIN-SUFFIX, smzdm.com, DIRECT
 
