@@ -1,0 +1,269 @@
+[general]
+# list中的域名将不使用fake-ip方式, 多个域名用“, ”连接。其它域名则全部采用 fake-ip及远程解析的模式
+# DNS 排除列表
+dns_exclusion_list = *.cmbchina.com, *.cmpassport.com, *.jegotrip.com.cn, *.icitymobile.mobi, *.pingan.com.cn, id6.me
+
+# 下列表中内容将不经过QuantumultX的处理
+excluded_routes=10.0.0.0/8, 127.0.0.0/8, 169.254.0.0/16, 192.0.2.0/24, 192.168.0.0/16, 198.51.100.0/24, 224.0.0.0/4
+# 资源解析器
+resource_parser_url=https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/resource-parser.js
+profile_img_url= https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/img/dragonball/1.PNG
+server_check_url=http://www.gstatic.com/generate_204
+
+[dns]
+# DNS over HTTP/3
+# prefer-doh3
+# 禁用系统 DNS
+no-system
+# 禁用 IPv6
+no-ipv6
+# 指定的 dns服务器
+#server=114.114.114.114
+#server=202.141.176.93 
+#server=202.141.178.13
+#server=117.50.10.10
+#server=223.5.5.5
+#server=119.29.29.29:53
+#server=119.28.28.28
+
+# DNS over HTTPS
+doh-server=https://dns.alidns.com/dns-query,https://223.6.6.6/dns-query,https://doh.pub/dns-query,https://cloudflare-dns.com/dns-query,https://doh.opendns.com/dns-query
+
+# 本地 DNS 映射
+server=/*.taobao.com/223.5.5.5
+server=/*.tmall.com/223.5.5.5
+server=/*.alipay.com/223.5.5.5
+server=/*.alicdn.com/223.5.5.5
+server=/*.aliyun.com/223.5.5.5
+server=/*.jd.com/119.28.28.28
+server=/*.qq.com/119.28.28.28
+server=/*.tencent.com/119.28.28.28
+server=/*.weixin.com/119.28.28.28
+server=/*.bilibili.com/119.29.29.29
+server=/hdslb.com/119.29.29.29
+server=/*.163.com/119.29.29.29
+server=/*.126.com/119.29.29.29
+server=/*.126.net/119.29.29.29
+server=/*.127.net/119.29.29.29
+server=/*.netease.com/119.29.29.29
+server=/*.mi.com/119.29.29.29
+server=/*.xiaomi.com/119.29.29.29
+
+# Apple
+server=/aaplimg.com/119.29.29.29
+server=/apple.com/119.29.29.29
+server=/apple.com.cn/119.29.29.29
+server=/apple-cloudkit.com/119.29.29.29
+server=/apple-mapkit.com/119.29.29.29
+server=/cdn-apple.com/119.29.29.29
+server=/icloud.com/119.29.29.29
+server=/icloud.com.cn/119.29.29.29
+server=/mzstatic.com/119.29.29.29
+server=/*.aaplimg.com/119.29.29.29
+server=/*.apple.com/119.29.29.29
+server=/*.apple-cloudkit.com/119.29.29.29
+server=/*.apple-mapkit.com/119.29.29.29
+server=/*.cdn-apple.com/119.29.29.29
+server=/*.icloud.com/119.29.29.29
+server=/*.icloud.com.cn/119.29.29.29
+server=/*.mzstatic.com/119.29.29.29
+server=/*apple.com.akadns.net/119.29.29.29
+server=/*.apple.com.edgekey.net/119.29.29.29
+server=/*.apple.com.edgekey.net.globalredir.akadns.net/119.29.29.29
+server=/*icloud.com.akadns.net/119.29.29.29
+
+# Firebase Cloud Messaging
+address=/mtalk.google.com/108.177.125.188
+
+# Google Dl
+server=/dl.google.com/119.29.29.29
+server=/dl.l.google.com/119.29.29.29
+server=/update.googleapis.com/119.29.29.29
+
+# PlayStation
+server=/*.dl.playstation.net/119.29.29.29
+
+# Router Admin Panel
+server=/amplifi.lan/system
+server=/router.synology.com/system
+server=/sila.razer.com/system
+server=/router.asus.com/system
+server=/routerlogin.net/system
+server=/orbilogin.com/system
+server=/www.LinksysSmartWiFi.com/system
+server=/LinksysSmartWiFi.com/system
+server=/myrouter.local/system
+server=/www.miwifi.com/system
+server=/miwifi.com/system
+server=/mediarouter.home/system
+server=/tplogin.cn/system
+server=/tplinklogin.net/system
+server=/melogin.cn/system
+server=/falogin.cn/system
+
+# Apple TestFlight
+server=/*testflight.apple.com/8.8.4.4
+
+[policy]
+static=Shawn, direct, proxy, reject
+static=OpenAI, direct, proxy, reject
+
+[server_remote]
+
+
+[filter_remote]
+https://raw.githubusercontent.com/ddgksf2013/Filter/master/Unbreak.list, tag=规则修正, update-interval=2592000, opt-parser=true, enabled=true
+https://raw.githubusercontent.com/WuhanReganmian/app-config/main/blockList, tag=自用屏蔽, force-policy=reject, update-interval=-1, opt-parser=false, enabled=true
+https://raw.githubusercontent.com/Cats-Team/AdRules/main/qx.conf, tag=去广告Cats, force-policy=reject, update-interval=2592000, opt-parser=true, enabled=true
+https://raw.githubusercontent.com/eHpo1/Rules/master/QuantumultX/Filter/Liby.txt, tag=Liby, force-policy=reject, update-interval=2592000, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/AdRule.list, tag=nobyda_广告, force-policy=reject, update-interval=2592000, opt-parser=false, enabled=true
+
+http://limbopro.xyz/Adblock4limbo.list, tag=毒奶特供, force-policy=reject, update-interval=2592000, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/QuantumultX/WeChat/WeChat.list, tag=微信, force-policy=direct, update-interval=2592000, opt-parser=true, enabled=true
+
+# Advertising 广告
+https://github.com/blackmatrix7/ios_rule_script/raw/master/rule/QuantumultX/OpenAI/OpenAI.list, tag=OpenAI, force-policy=proxy, update-interval=2592000, opt-parser=false, enabled=true
+https://raw.githubusercontent.com/ddgksf2013/Filter/master/Streaming.list, tag=国际媒体, force-policy=proxy, update-interval=2592000, opt-parser=true, enabled=true
+https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Proxy.list, tag=全球加速, force-policy=proxy, update-interval=2592000, opt-parser=true, enabled=true
+https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/ProxyGFWlist.list, tag=ACL4 全球加速, force-policy=proxy, update-interval=2592000, opt-parser=true, enabled=false
+https://raw.githubusercontent.com/WuhanReganmian/app-config/main/qx_direct_connections, tag=自用直连, force-policy=direct, update-interval=-1, opt-parser=false, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, tag=国内ASN, force-policy=direct, update-interval=2592000, opt-parser=true, enabled=true
+
+[rewrite_remote]
+https://github.com/ddgksf2013/Rewrite/raw/master/AdBlock/XiaoHongShu.conf, tag=小红书去广告, update-interval=604800, opt-parser=false, enabled=true
+https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/QX.snippet, tag=Sub-store, update-interval=-1, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/bin64/Scripts/main/QuantumultX/vvebo.js, tag=vvebo修复主页, update-interval=-1, opt-parser=true, enabled=true
+https://raw.githubusercontent.com/Yuheng0101/X/main/Scripts/bika.js, tag=哔咔, update-interval=-1, opt-parser=true, enabled=false
+https://gist.githubusercontent.com/Sliverkiss/b564306f40741c8d549409fbe6c2aae9/raw/acfun.conf, tag=AcFun获取token, update-interval=172800, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js, tag=高德cookie, update-interval=-1, opt-parser=true, enabled=false
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/tieba/tieba_signin.qxrewrite, tag=贴吧Cookie, update-interval=-1, opt-parser=false, enabled=false
+https://github.com/ddgksf2013/Rewrite/raw/master/AdBlock/Amap.conf, tag=墨鱼  高德净化, update-interval=2592000, opt-parser=false, enabled=false
+https://github.com/ddgksf2013/Rewrite/raw/master/AdBlock/Bilibili.conf, tag=B站去广告+1080P高码率@ddgksf2013, update-interval=-1, opt-parser=false, enabled=true
+https://raw.githubusercontent.com/yqc007/QuantumultX/master/AdGuardProCrack.js, tag=Adguard高级版, update-interval=-1, opt-parser=true, enabled=false
+https://raw.githubusercontent.com/yqc007/QuantumultX/master/1BlockerProCrack.js, tag=1Blocker高级版, update-interval=-1, opt-parser=true, enabled=false
+https://raw.githubusercontent.com/yqc007/QuantumultX/master/mdsqallcrack.js, tag=麻豆, update-interval=-1, opt-parser=true, enabled=true
+https://ghproxy.com/https://github.com/ddgksf2013/dev/raw/master/ForOwnUse.conf, tag=墨鱼专属VIP@ddgksf2013, update-interval=-1, opt-parser=false, enabled=false
+
+
+https://subweb.oss-cn-hongkong.aliyuncs.com/Module/embyUnlocked.conf, tag=embyUnlocked, update-interval=-1, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/Zhuliyer/ADGai-nai/master/Quantumult%20X/AD_Gai_JS.conf, tag=ad_gai, update-interval=2592000, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/WuhanReganmian/app-config/main/qx_tiktok_17.8.0.conf, tag=tiktok_17.8.0, update-interval=-1, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/zhihu/zhihu_plus.sgmodule, tag=知乎去广告, update-interval=-1, opt-parser=true, enabled=false
+https://raw.githubusercontent.com/jinchenwuheikeji/Quantumult_X/master/TikTok-US.conf, tag=tiktok解锁、去水印, update-interval=-1, opt-parser=true, enabled=true
+http://limbopro.xyz/Adblock4limbo.conf, tag=毒奶特供, update-interval=2592000, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/Rewrite_lhie1.conf, tag=nobyda_广告重写规则, update-interval=2592000, opt-parser=false, enabled=true
+https://raw.githubusercontent.com/DivineEngine/Profiles/master/Quantumult/Rewrite/Block/YouTubeAds.conf, tag=神机规则_YouTube去广告, update-interval=2592000, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/Tartarus2014/QuantumultX-Script/main/Unlock/TiktokUS.conf, tag=tiktok, update-interval=-1, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/Js_Remote_Cookie.conf, tag=NobyDa Cookie获取, update-interval=-1, opt-parser=false, enabled=false
+https://raw.githubusercontent.com/eHpo1/Rules/master/QuantumultX/Rewrite.txt, tag=eHpo1 去广告, update-interval=86400, opt-parser=false, enabled=false
+
+
+[server_local]
+
+# 以下示范都是 ip(域名):端口，
+# 比如 vmess-a.203.167.55.4:777 ，实际是 203.167.55.4:777
+# 前面的 ss-a，ws-tls这些，只是为了让你快速找到自己节点的类型
+# 实际使用时，请不要真的 傻乎乎的 写 vmess-a.203.167.55.4:777 这种。
+# 目前支持 shadowsocks/shadowsocksR/Vmess/Trojan/http(s)/Socks5 等类型
+# 支持 tls-cert-sha256 以及 tls-pubkey-sha256 参数等自定义TLS验证
+
+#shadowsocks以及shadowsocksR类型, 支持 V2-Plugin
+#支持UDP，支持UDP-OVER-TCP（版本1.0.29 665+）
+;shadowsocks=ss-a.example.com:80, method=chacha20, password=pwd, obfs=http, obfs-host=bing.com, obfs-uri=/resource/file, fast-open=false, udp-relay=false, server_check_url=http://www.apple.com/generate_204, tag=Sample-A
+;shadowsocks=ss-b.example.com:80, method=chacha20, password=pwd, obfs=http, obfs-host=bing.com, obfs-uri=/resource/file, fast-open=false, udp-relay=false, tag=Sample-B
+;shadowsocks=ss-c.example.com:443, method=chacha20, password=pwd, obfs=tls, obfs-host=bing.com, fast-open=false, udp-relay=false, tag=Sample-C
+;shadowsocks=ssr-a.example.com:443, method=chacha20, password=pwd, ssr-protocol=auth_chain_b, ssr-protocol-param=def, obfs=tls1.2_ticket_fastauth, obfs-host=bing.com, tag=Sample-D
+;shadowsocks=ws-a.example.com:80, method=aes-128-gcm, password=pwd, obfs=ws, obfs-uri=/ws, fast-open=false, udp-relay=false, tag=Sample-E
+;shadowsocks=ws-b.example.com:80, method=aes-128-gcm, password=pwd, obfs=ws, fast-open=false, udp-relay=false, tag=Sample-F
+;shadowsocks=ws-tls-a.example.com:443, method=aes-128-gcm, password=pwd, obfs=wss, obfs-uri=/ws, fast-open=false, udp-relay=false, tag=Sample-G
+;shadowsocks=ws-tls-a.example.com:443, method=aes-128-gcm, password=pwd, udp-over-tcp=true fast-open=false, udp-relay=false, tag=Sample-H
+
+# vmess 类型，ws，wss(ws+tls),over-tls,tcp，支持 UDP
+# vmess 类型节点默认开启 aead，关闭请用 aead=false
+; ws 类型
+;vmess=ws-c.example.com:80, method=chacha20-ietf-poly1305, password= 23ad6b10-8d1a-40f7-8ad0-e3e35cd32291, obfs-host=ws-c.example.com, obfs=ws, obfs-uri=/ws, fast-open=false, udp-relay=false, aead=false, tag=Sample-H
+; wss(ws+tls) 类型
+;vmess=ws-tls-b.example.com:443, method=chacha20-ietf-poly1305, password= 23ad6b10-8d1a-40f7-8ad0-e3e35cd32291, obfs-host=ws-tls-b.example.com, obfs=wss, obfs-uri=/ws, tls-verification=true,fast-open=false, udp-relay=false, tag=Sample-I
+; http 类型
+;vmess=example.com:80, method=chacha20-poly1305, password=23ad6b10-8d1a-40f7-8ad0-e3e35cd32291, obfs=http, obfs-host=bing.com, obfs-uri=/resource/file, fast-open=false, udp-relay=false, server_check_url=http://www.apple.com/generate_204, tag=vmess-http
+; tcp 类型
+;vmess=vmess-a.example.com:80, method=aes-128-gcm, password=23ad6b10-8d1a-40f7-8ad0-e3e35cd32291, fast-open=false, udp-relay=false, tag=Sample-J
+;vmess=vmess-b.example.com:80, method=none, password=23ad6b10-8d1a-40f7-8ad0-e3e35cd32291, fast-open=false, udp-relay=false, tag=Sample-K
+; over-tls 类型
+;vmess=vmess-over-tls.example.com:443, method=none, password=23ad6b10-8d1a-40f7-8ad0-e3e35cd32291, obfs-host=vmess-over-tls.example.com, obfs=over-tls, tls-verification=true, fast-open=false, udp-relay=false, tag=Sample-L
+
+; http(s) 类型
+;http=http.example.com:80, username=name, password=pwd, fast-open=false, udp-relay=false, tag=http
+;http=https.example.com:443, username=name, password=pwd, over-tls=true, tls-verification=true, tls-host=example.com, tls-verification=true, fast-open=false, udp-relay=false, tag=http-tls
+
+# socks5 类型节点
+;socks5=example.com:80,fast-open=false, udp-relay=false, tag=socks5-01
+;socks5=example.com:80, username=name, password=pwd, fast-open=false, udp-relay=false, tag=socks5-02
+;socks5=example.com:443, username=name, password=pwd, over-tls=true, tls-host=example.com, tls-verification=true, fast-open=false, udp-relay=false, tag=socks5-tls-01
+;socks5=example.com:443, username=name, password=pwd, over-tls=true, tls-host=example.com, tls-verification=true, tls-pubkey-sha256=eb5ec6684564fd0d04975903ed75342d1b9fdc2096ea54b4cf8caf4740f4ae25, fast-open=false, udp-relay=false, tag=socks5-tls-02
+
+; trojan 类型, 支持 over-tls 以及 websockets，支持 UDP
+;trojan=example.com:443, password=pwd, over-tls=true, tls-verification=true, fast-open=false, udp-relay=true, tag=trojan-tls-01
+;trojan=example1.com:443, password=pwd, over-tls=true, tls-host=example.com, tls-verification=true, fast-open=false, udp-relay=false, tag=trojan-tls-02
+;trojan=192.168.1.1:443, password=pwd, obfs=wss, obfs-host=example.com, obfs-uri=/path, udp-relay=true, tag=trojan-wss-05
+
+
+
+[filter_local]
+# > 一些比较容易忽视的分流
+host, ad.12306.cn, direct
+host, gg.caixin.com, direct
+host, sdkapp.uve.weibo.com, direct
+host-suffix, ucweb.com, direct
+host-suffix, kuwo.cn, direct
+host, ntb.lanjie100.com, reject
+
+# > 贴吧屏蔽域名dns查询
+ip-cidr, 180.76.76.200/32, reject
+
+host-suffix, local, direct
+ip-cidr, 10.0.0.0/8, direct
+ip-cidr, 17.0.0.0/8, direct
+ip-cidr, 100.64.0.0/10, direct
+ip-cidr, 127.0.0.0/8, direct
+ip-cidr, 172.16.0.0/12, direct
+ip-cidr, 192.168.0.0/16, direct
+geoip, cn, direct
+final, proxy
+
+
+[rewrite_local]
+
+
+[task_local]
+11 7 * * * https://raw.githubusercontent.com/MCdasheng/QuantumultX/main/Scripts/myScripts/acfun.js, tag=AcFun签到, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/acfun.png, enabled=true
+0 0 1 1 * https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js, tag=高德, enabled=true
+
+0 0 1 1 * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/tieba/tieba_signin.js, tag=贴吧任务, enabled=true
+10 0 * * * https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/nga/nga.js, tag=NGA刮墙, img-url=https://raw.githubusercontent.com/Orz-3/task/master/nga.png, enabled=true
+10 9 * * * https://raw.githubusercontent.com/yangtingxiao/QuantumultX/master/scripts/ttwk/ttwk.js, tag=支付宝天天挖矿, img-url=https://raw.githubusercontent.com/yangtingxiao/QuantumultX/master/image/ttwk.png, enabled=true
+55 23 * * * https://github.com/sub-store-org/Sub-Store/releases/latest/download/cron-sync-artifacts.min.js, tag=Sub-Store Sync, img-url=https://raw.githubusercontent.com/58xinian/icon/master/Sub-Store1.png, enabled=false
+5 0 0 * * * https://raw.githubusercontent.com/toulanboy/scripts/master/weibo/weibotalk.js, tag=微博超话, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/WeiboTalk.png, enabled=false
+2 0 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.js, tag=bilibili, img-url=https://raw.githubusercontent.com/Orz-3/task/master/bilibili.png, enabled=false
+0 7 * * * https://raw.githubusercontent.com/zZPiglet/Task/master/heybox/heybox.js, tag=小黑盒, img-url=https://raw.githubusercontent.com/Orz-3/task/master/heybox.png, enabled=false
+15 0 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_signin.js, tag=中国联通, img-url=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/10010.png, enabled=false
+0 0 * * * https://ghproxy.com/https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js, tag=航旅纵横, img-url=https://ghproxy.com/https://raw.githubusercontent.com/Orz-3/mini/master/Color/umetrip.png, enabled=false
+0 0 1 1 * https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js, tag=52破解, enabled=false
+
+# 什么值得买
+#浏览器访问并登录: https://zhiyou.smzdm.com/user/login
+
+
+# NGA刮墙 (by chouchoui)
+# 杀掉NGA后台并重新打开NGA，提示Cookie获取成功
+event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/switch-check-ytb.js, tag=YouTube 切换, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube_Letter.png, enabled=false
+event-interaction https://raw.githubusercontent.com/KOP-XIAO/QuantumultX/master/Scripts/streaming-ui-check.js, tag=流媒体-解锁查询, img-url=checkmark.seal.system, enabled=false
+55 23 * * * https://ghproxy.com/https://raw.githubusercontent.com/sngxpro/jd_scripts-1/master/jd_unsubscribe.js, tag=取关京东店铺商品, img-url=https://ghproxy.com/https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=false
+
+
+
+
+
+
+[http_backend]
+https://raw.githubusercontent.com/chavyleung/scripts/master/chavy.box.js, tag=BoxJs, path=^/, enabled=true
