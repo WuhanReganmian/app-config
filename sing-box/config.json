@@ -350,6 +350,25 @@
     ],
     "outbounds": [
         {
+          "tag": "proxy",
+          "type": "hysteria2",
+          "server": "127.0.0.1",
+          "server_port": 20000-50000,
+          "up_mbps": 20,
+          "down_mbps": 120,
+          "password": "<password>",
+          "tls": {
+            "enabled": true,
+            "server_name": "aod.itunes.apple.com",
+            "insecure": true
+          },
+          "transport": {
+              "udp": {
+                  "hopInterval": "30s"
+              }
+          }
+        },
+        {
             "type": "direct",
             "tag": "direct"
         },
