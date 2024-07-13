@@ -353,7 +353,7 @@
           "tag": "proxy",
           "type": "hysteria2",
           "server": "127.0.0.1",
-          "server_port": "20000-50000",
+          "server_port": 4433,
           "up_mbps": 20,
           "down_mbps": 120,
           "password": "<password>",
