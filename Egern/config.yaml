@@ -2,9 +2,9 @@
 proxies:
 - Hysteria2:
     name: 自用
-    server: 
+    server: ''
     port: 23457
-    auth: 
+    auth: ''
     sni: aod.itunes.apple.com
     skip_tls_verify: true
 policy_groups:
