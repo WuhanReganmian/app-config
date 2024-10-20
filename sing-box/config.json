@@ -1,326 +1,391 @@
 {
-    "log": {
-        "level": "info",
-        "timestamp": true
-    },
-    "dns": {
-        "servers": [
-            {
-                "tag": "dns_proxy",
-                "address": "https://1.1.1.1/dns-query",
-                "address_resolver": "dns_resolver",
-                "strategy": "ipv4_only",
-                "detour": "proxy"
-            },
-            {
-                "tag": "dns_direct",
-                "address": "https://dns.alidns.com/dns-query",
-                "address_resolver": "dns_resolver",
-                "strategy": "ipv4_only",
-                "detour": "direct"
-            },
-            {
-                "tag": "dns_resolver",
-                "address": "223.5.5.5",
-                "detour": "direct"
-            },
-            {
-              "tag": "dns_block",
-              "address": "rcode://refused"
-            }
-        ],
-        "rules": [
-            {
-                "outbound": "any",
-                "server": "dns_resolver"
-            },
-            {
-                "rule_set": "geosite-geolocation-!cn",
-                "server": "dns_proxy"
-            },
-            {
-                "rule_set": ["geoip-cn", "geosite-cn"],
-                "server": "dns_direct"
-            },
-            {
-              "process_name": [
-                "com.tencent.mobileqq",
-                "com.tencent.mm",
-                "com.miui.weather2",
-                "com.xiaomi.market",
-                "idm.internet.download.manager.plus"
-              ],
-              "server": "dns_direct"
-            }
-        ],
-        "final": "dns_proxy"
-    },
-    "route": {
+  "log": {
+    "disabled": false,
+    "level": "error",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns_proxy",
+        "address": "https://1.1.1.1/dns-query",
+        "address_resolver": "dns_resolver",
+        "strategy": "ipv4_only",
+        "detour": "proxy"
+      },
+      {
+        "tag": "dns_direct",
+        "address": "https://dns.alidns.com/dns-query",
+        "address_resolver": "dns_resolver",
+        "strategy": "ipv4_only",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns_resolver",
+        "address": "223.5.5.5",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns_block",
+        "address": "rcode://refused"
+      }
+    ],
+    "rules": [
+      {
+        "outbound": "any",
+        "server": "dns_resolver"
+      },
+      {
+        "rule_set": "geosite-geolocation-!cn",
+        "server": "dns_proxy"
+      },
+      {
         "rule_set": [
-            {
-                "tag": "geosite-geolocation-!cn",
-                "type": "remote",
-                "format": "binary",
-                "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
-                "download_detour": "proxy",
-                "update_interval": "7d"
-            },
-            {
-                "tag": "geoip-cn",
-                "type": "remote",
-                "format": "binary",
-                "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
-                "download_detour": "proxy",
-                "update_interval": "7d"
-            },
-            {
-                "tag": "geosite-cn",
-                "type": "remote",
-                "format": "binary",
-                "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
-                "download_detour": "proxy",
-                "update_interval": "7d"
-            },
-            {
-              "tag": "geoip-google",
-              "type": "remote",
-              "format": "binary",
-              "url": "https://raw.githubusercontent.com/CHIZI-0618/v2ray-rules-dat/release/singbox_ip_rule_set/geoip-google.srs",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "geoip-telegram",
-              "type": "remote",
-              "format": "binary",
-              "url": "https://raw.githubusercontent.com/CHIZI-0618/v2ray-rules-dat/release/singbox_ip_rule_set/geoip-telegram.srs",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "geoip-twitter",
-              "type": "remote",
-              "format": "binary",
-              "url": "https://raw.githubusercontent.com/CHIZI-0618/v2ray-rules-dat/release/singbox_ip_rule_set/geoip-twitter.srs",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "geoip-netflix",
-              "type": "remote",
-              "format": "binary",
-              "url": "https://raw.githubusercontent.com/CHIZI-0618/v2ray-rules-dat/release/singbox_ip_rule_set/geoip-netflix.srs",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "Global",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Global.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "YouTube",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/YouTube.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "OpenAI",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/OpenAI.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "TikTok",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/TikTok.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "Telegram",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Telegram.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "Netflix",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Netflix.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "WeChat",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/WeChat.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "Bilibili",
-              "type": "remote",
-              "format": "source",
-              "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Bilibili.json",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            },
-            {
-              "tag": "geosite-category-ads-all",
-              "type": "remote",
-              "format": "binary",
-              "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
-              "download_detour": "proxy",
-              "update_interval": "7d"
-            }
+          "geoip-cn",
+          "geosite-cn"
         ],
-        "rules": [
-            {
-                "protocol": "dns",
-                "outbound": "dns-out"
-            },
-            {
-                "port": 853,
-                "network": "tcp",
-                "outbound": "block"
-            },
-            {
-                "port": [
-                    443,
-                    853
-                ],
-                "network": "udp",
-                "outbound": "block"
-            },
-            {
-                "type": "logical",
-                "mode": "and",
-                "rules": [
-                    {
-                        "rule_set": "geoip-cn",
-                        "invert": true
-                    },
-                    {
-                        "rule_set": "geosite-geolocation-!cn"
-                    }
-                ],
-                "outbound": "proxy"
-            },
-            {
-                "type": "logical",
-                "mode": "and",
-                "rules": [
-                    {
-                        "rule_set": "geoip-cn"
-                    },
-                    {
-                        "rule_set": "geosite-cn"
-                    }
-                ],
-                "outbound": "direct"
-            },
-            {
-                "rule_set": "geoip-cn",
-                "outbound": "direct"
-            },
-            {
-                "ip_is_private": true,
-                "outbound": "direct"
-            },
-            {
-              "rule_set": [
-                "WeChat",
-                "Bilibili"
-              ],
-              "outbound": "direct"
-            },
-            {
-              "rule_set": [
-                "YouTube",
-                "Telegram",
-                "Netflix",
-                "OpenAI",
-                "geoip-google",
-                "geoip-telegram",
-                "geoip-twitter",
-                "geoip-netflix"
-              ],
-              "outbound": "proxy"
-            },
-            {
-              "rule_set": "Global",
-              "outbound": "proxy"
-            },
-            {
-              "protocol": "quic",
-              "outbound": "block"
-            },
-            {
-                "rule_set": "geosite-category-ads-all",
-                "outbound": "block"
-            }
+        "server": "dns_direct"
+      },
+      {
+        "process_name": [
+          "com.tencent.mobileqq",
+          "com.tencent.mm",
+          "com.miui.weather2",
+          "com.xiaomi.market",
+          "idm.internet.download.manager.plus"
         ],
-        "final": "proxy",
-        "auto_detect_interface": true
-    },
-    "inbounds": [
-        {
-            "type": "tun",
-            "tag": "tun-in",
-            "inet4_address": "172.16.0.1/30",
-            "inet6_address": "fd00::1/126",
-            "mtu": 1400,
-            "auto_route": true,
-            "strict_route": true,
-            "stack": "gvisor",
-            "sniff": true,
-            "sniff_override_destination": false
-        }
+        "server": "dns_direct"
+      }
     ],
-    "outbounds": [
-        {
-          "tag": "proxy",
-          "type": "hysteria2",
-          "server": "127",
-          "server_port": 23456,
-          "up_mbps": 20,
-          "down_mbps": 120,
-          "password": "password",
-          "tls": {
-            "enabled": true,
-            "server_name": "aod.itunes.apple.com",
-            "insecure": true
-          }
-        },
-        {
-            "type": "direct",
-            "tag": "direct"
-        },
-        {
-            "type": "block",
-            "tag": "block"
-        },
-        {
-            "type": "dns",
-            "tag": "dns-out"
-        }
-    ],
-    "experimental": {
-        "cache_file": {
-            "enabled": true,
-            "path": "cache.db"
-        }
+    "final": "dns_proxy",
+    "strategy": "ipv4_only",
+    "disable_cache": false,
+    "disable_expire": false
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "mtu": 1400,
+      "address": [
+        "172.18.0.1/30",
+        "fdfe:dcba:9876::1/126"
+      ],
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "mixed",
+      "endpoint_independent_nat": false,
+      "sniff": true,
+      "sniff_override_destination": false
     }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "type": "selector",
+      "interrupt_exist_connections": false,
+      "default": "hy2",
+      "outbounds": [
+        "hy2",
+        "grpc",
+        "vision"
+      ]
+    },
+    {
+      "tag": "兜底",
+      "type": "selector",
+      "interrupt_exist_connections": true,
+      "default": "direct",
+      "outbounds": [
+        "{all}"
+      ],
+      "filter": [
+        {
+          "action": "exclude",
+          "keyword": [
+            "block|dns"
+          ]
+        }
+      ]
+    },
+    {
+      "tag": "hy2",
+      "type": "hysteria2",
+      "server": "",
+      "server_port": 23456,
+      "up_mbps": 50,
+      "down_mbps": 300,
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "aod.itunes.apple.com",
+        "insecure": true
+      }
+    },
+    {
+      "tag": "grpc",
+      "type": "vless",
+      "server": "",
+      "server_port": 123,
+      "uuid": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "aod.itunes.apple.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "",
+          "short_id": ""
+        }
+      },
+      "packet_encoding": "xudp",
+      "transport": {
+        "type": "grpc",
+        "service_name": ""
+      }
+    },
+    {
+      "tag": "vision",
+      "type": "vless",
+      "server": "",
+      "server_port": 123,
+      "uuid": "",
+      "flow": "xtls-rprx-vision",
+      "tls": {
+        "enabled": true,
+        "server_name": "aod.itunes.apple.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "",
+          "short_id": ""
+        }
+      },
+      "packet_encoding": "xudp"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "domain_suffix": [
+          "unity3d.com",
+          "appsflyer.com",
+          "amazonaws.com",
+          "neonapi.com",
+          "appsflyersdk.com",
+          "pmang.cloud"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "network": "tcp",
+        "port": 853,
+        "outbound": "block"
+      },
+      {
+        "network": "udp",
+        "port": [
+          443,
+          853
+        ],
+        "outbound": "block"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geoip-cn",
+            "invert": true
+          },
+          {
+            "rule_set": "geosite-geolocation-!cn"
+          }
+        ],
+        "outbound": "proxy"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geoip-cn"
+          },
+          {
+            "rule_set": "geosite-cn"
+          }
+        ],
+        "outbound": "direct"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "WeChat",
+          "Bilibili"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "YouTube",
+          "Telegram",
+          "Netflix",
+          "OpenAI"
+        ],
+        "outbound": "proxy"
+      },
+      {
+        "rule_set": "Global",
+        "outbound": "proxy"
+      },
+      {
+        "protocol": "quic",
+        "outbound": "block"
+      },
+      {
+        "rule_set": "geosite-category-ads-all",
+        "outbound": "block"
+      }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "geosite-geolocation-!cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "Global",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Global.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "YouTube",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/YouTube.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "OpenAI",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/OpenAI.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "TikTok",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/TikTok.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "Telegram",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Telegram.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "Netflix",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Netflix.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "WeChat",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/WeChat.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "Bilibili",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Bilibili.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-category-ads-all",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      }
+    ],
+    "final": "兜底",
+    "auto_detect_interface": true,
+    "override_android_vpn": true
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": "ui",
+      "external_ui_download_url": "https://ghp.ci/https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip",
+      "external_ui_download_detour": "direct",
+      "secret": "AjIuQAZf795UQ16V3si6",
+      "default_mode": "rule"
+    },
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db"
+    }
+  }
 }
