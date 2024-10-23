@@ -111,6 +111,7 @@ tun:
   exclude-package:
     - com.android.captiveportallogin
 
+proxies: null
 proxy-groups:
   - name: "proxy"
     type: select
