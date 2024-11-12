@@ -1,0 +1,65 @@
+{
+  "log": {
+    "level": "info"
+  },
+  "dns": {
+    "servers": [
+      {
+        "address": "1.1.1.1"
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "hysteria2",
+      "listen": "::",
+      "listen_port": 4433,
+      "sniff": true,
+      "up_mbps": 60,
+      "down_mbps": 600,
+      "users": [
+        {
+          "password": ""
+        }
+      ],
+      "tls": {
+        "enabled": true,
+        "alpn": ["h3"],
+        "acme": {
+          "domain": "",
+          "email": ""
+        }
+      }
+    },
+    {
+      "type": "naive",
+      "listen": "::",
+      "listen_port": 5566,
+      "users": [{ "username": "", "password": "" }],
+      "tls": {
+        "enabled": true,
+        "acme": {
+          "domain": "",
+          "email": ""
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      }
+    ]
+  }
+}
