@@ -1,0 +1,340 @@
+{
+  "log": {
+    "level": "warn"
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns_proxy",
+        //"address": "https://1.1.1.1/dns-query",
+        "address": "https://dns.google/dns-query",
+        "address_resolver": "dns_resolve",
+        "detour": "proxy",
+        "strategy": "ipv4_only",
+        "client_subnet": "1.0.1.0"
+      },
+      {
+        "tag": "dns_resolve",
+        "address": "8.8.8.8",
+        "detour": "direct",
+        "strategy": "ipv4_only"
+      },
+      {
+        "tag": "dns_direct",
+        "address": "114.114.114.114",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns_block",
+        "address": "rcode://refused"
+      }
+    ],
+    "rules": [
+      {
+        "outbound": "any",
+        "server": "dns_direct"
+      },
+      {
+        "clash_mode": "direct",
+        "server": "dns_direct"
+      },
+      {
+        "clash_mode": "global",
+        "server": "dns_proxy"
+      },
+      {
+        "rule_set": "geosite-geolocation-!cn",
+        "server": "dns_proxy"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "server": "dns_direct"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite-geolocation-!cn",
+            "invert": true
+          },
+          {
+            "rule_set": "geoip-cn"
+          }
+        ],
+        "server": "dns_proxy",
+        "client_subnet": "114.114.114.114/24"
+      }
+    ],
+    "final": "dns_proxy",
+    "disable_cache": false,
+    "disable_expire": false
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "mtu": 1500,
+      "address": [
+        "172.18.0.1/30",
+        "fdfe:dcba:9876::1/126"
+      ],
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "mixed"
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "type": "selector",
+      "interrupt_exist_connections": false,
+      "outbounds": [
+        "byte",
+        "claw"
+      ]
+    },
+    {
+      "tag": "兜底",
+      "type": "selector",
+      "interrupt_exist_connections": true,
+      "outbounds": [
+        "direct",
+        "proxy"
+      ]
+    },
+    {
+      "tag": "byte",
+      "type": "hysteria2",
+      "server": "",
+      "server_port": ,
+      "up_mbps": 50,
+      "down_mbps": 300,
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": ""
+      }
+    },
+    {
+      "tag": "claw",
+      "type": "hysteria2",
+      "server": "",
+      "server_port": ,
+      "up_mbps": 50,
+      "down_mbps": 300,
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": ""
+      }
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "inbound": "tun-in",
+        "action": "sniff"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "domain_suffix": [
+          "unity3d.com",
+          "appsflyer.com",
+          "amazonaws.com",
+          "appsflyersdk.com",
+          "pmang.cloud",
+          "digitalchina.com",
+          "hotmail.com",
+          "microsoftonline.com"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "port": 853,
+        "network": "tcp",
+        "action": "reject"
+      },
+      {
+        "network": "udp",
+        "port": [
+          443,
+          853
+        ],
+        "action": "reject"
+      },
+      {
+        "rule_set": "geosite-geolocation-!cn",
+        "outbound": "proxy"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geoip-cn"
+          },
+          {
+            "rule_set": "geosite-cn"
+          }
+        ],
+        "outbound": "direct"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "WeChat",
+          "Bilibili"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "YouTube",
+          "Telegram",
+          "Netflix",
+          "OpenAI"
+        ],
+        "outbound": "proxy"
+      },
+      {
+        "clash_mode": "direct",
+        "outbound": "direct"
+      },
+      {
+        "clash_mode": "global",
+        "outbound": "proxy"
+      },
+      {
+        "rule_set": "Global",
+        "outbound": "proxy"
+      },
+      {
+        "rule_set": "geosite-category-ads-all",
+        "action": "reject"
+      }
+    ],
+    "rule_set": [
+      {
+        "tag": "geosite-geolocation-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/geolocation-!cn.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "geosite-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "Global",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Global.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "YouTube",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/YouTube.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "OpenAI",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/OpenAI.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "TikTok",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/TikTok.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "Telegram",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Telegram.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "Netflix",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Netflix.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "WeChat",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/WeChat.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "Bilibili",
+        "type": "remote",
+        "format": "source",
+        "url": "https://raw.githubusercontent.com/yangchuansheng/sing-box-geosite/main/rule/Bilibili.json",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      },
+      {
+        "tag": "geosite-category-ads-all",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
+        "download_detour": "proxy",
+        "update_interval": "7d"
+      }
+    ],
+    "final": "兜底",
+    "auto_detect_interface": true
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": "ui",
+      "external_ui_download_url": "https://ghp.ci/https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip",
+      "external_ui_download_detour": "direct",
+      "default_mode": "rule"
+    },
+    "cache_file": {
+      "enabled": true
+    }
+  }
+}
