@@ -29,7 +29,7 @@ proxies:
   type: direct
   udp: true
 
-pr: &pr {type: select, proxies: [默认, 香港, 台湾, 日本, 新加坡, 美国, 全部节点, 直连]}
+pr: &pr {type: select, proxies: [默认, 香港, 台湾, 日本, 新加坡, 美国, 直连]}
 proxy-groups:
 - {name: 默认, type: select, include-all: true, icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Proxy.png"}
 - {name: Google, <<: *pr, icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Google_Search.png"}
