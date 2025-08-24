@@ -1,3 +1,6 @@
 # 自用屏蔽广告
 
 DOMAIN-SUFFIX, googleadservices.com, REJECT
+
+# 农行防检测
+DOMAIN,msmp.abchina.com.cn,REJECT
