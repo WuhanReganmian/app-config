@@ -1,0 +1,130 @@
+{
+  "log": {
+    "level": "warn"
+  },
+  "dns": {
+    "servers": [
+      {"tag": "dns_proxy","type": "tls","server": "8.8.8.8"},
+      // {"tag": "dns_direct","type": "tls","server": "223.5.5.5"},
+      {"tag": "dns_direct","type": "local"},
+      {"tag": "fakeip","type": "fakeip","inet4_range": "198.18.0.0/15","inet6_range": "fc00::/18"}
+    ],
+    "rules": [
+      {"clash_mode": "direct","server": "dns_direct"},
+      {"clash_mode": "global","server": "dns_proxy"},
+      {"rule_set": ["my-direct", "geosite-cn"],"server": "dns_direct"},
+      {"query_type": ["A", "AAAA"],"clash_mode": "fakeip","server": "fakeip"}
+    ],
+    "strategy": "ipv4_only"
+  },
+  "certificate": {},
+  "inbounds": [
+    {
+      "tag": "tun-in",
+      "type": "tun",
+      "mtu": 1500,
+      "address": [
+        "172.18.0.1/30" ,
+        "fdfe:dcba:9876::1/126"
+      ],
+      "auto_route": true,
+      "strict_route": false,
+      "stack": "mixed"
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "type": "selector",
+      "interrupt_exist_connections": false,
+      "outbounds": ["anytls", "hy2", "reality"]
+    },
+    {
+      "tag": "兜底",
+      "type": "selector",
+      "interrupt_exist_connections": true,
+      "outbounds": ["proxy", "direct"]
+    },
+    {
+      "tag": "hy2",
+      "type": "hysteria2",
+      "server": "",
+      "server_ports": "20000:50000",
+      "up_mbps": 300,
+      "down_mbps": 300,
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": ""
+      }
+    },
+    {
+      "tag": "anytls",
+      "type": "anytls",
+      "server": "",
+      "server_port": 3322,
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": ""
+      }
+    },
+    {
+      "tag": "reality",
+      "type": "vless",
+      "server": "",
+      "server_port": 9988,
+      "uuid": "",
+      "flow": "xtls-rprx-vision",
+      "password": "",
+      "packet_encoding": "xudp",
+      "tls": {
+        "enabled": true,
+        "server_name": "",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "",
+          "short_id": ""
+        }
+      }
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {"action": "sniff"},
+      {"protocol": "dns","action": "hijack-dns"},
+      {"clash_mode": "direct","outbound": "direct"},
+      {"clash_mode": "global","outbound": "proxy"},
+      {"domain_suffix": ["googleapis.cn", "gstatic.com"], "outbound":"proxy"},
+      // {"domain_keyword": ["dmm.", ".jp"], "outbound":"claw_jp"},
+      {"rule_set": ["geoip-cn", "geosite-cn", "my-direct"],"outbound": "direct"},
+      {"clash_mode": "fakeip","outbound": "proxy"}
+    ],
+    "rule_set": [
+      {"tag": "geoip-cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/cn.srs","download_detour": "proxy","update_interval": "27d"},
+      {"tag": "geosite-cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs","download_detour": "proxy","update_interval": "27d"},
+      {"tag": "my-direct","type": "remote","format": "source","url": "https://raw.githubusercontent.com/WuhanReganmian/app-config/refs/heads/main/Rules/direct.json","download_detour": "proxy","update_interval": "27d"}
+    ],
+    "final": "兜底",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "dns_direct"
+  },
+  "experimental": {
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "default_mode": "global"
+    },
+    "cache_file": {
+      "enabled": true,
+      "store_fakeip": true
+    }
+  }
+}
