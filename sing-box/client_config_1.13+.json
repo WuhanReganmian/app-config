@@ -1,0 +1,193 @@
+{
+  "log": {
+    "level": "warn"
+  },
+  "dns": {
+    "servers": [
+      { "type": "tls", "tag": "dns_proxy", "server": "8.8.8.8" },
+      { "type": "tls", "tag": "dns_direct", "server": "223.5.5.5" },
+      { "type": "fakeip", "tag": "fakeip", "inet4_range": "198.18.0.0/15", "inet6_range": "fc00::/18" },
+      { "tag": "local", "type": "local" }
+      // {
+      //   "tag": "hosts",
+      //   "type": "hosts",
+      //   "predefined": {
+      //   }
+      // }
+    ],
+    "rules": [
+      // {
+      //   "domain": [],
+      //   "server": "hosts"
+      // },
+      { "clash_mode": "direct", "server": "dns_direct" },
+      { "clash_mode": "global", "server": "dns_proxy" },
+      { "query_type": ["A", "AAAA"], "clash_mode": "fakeip", "server": "fakeip" }
+    ],
+    "strategy": "ipv4_only",
+    "final": "dns_direct"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "mtu": 1500,
+      "address": ["172.18.0.1/30", "fdfe:dcba:9876::1/126"],
+      "auto_route": true,
+      "strict_route": true,
+      // win和安卓用system/mixed，ios用gvisor
+      "stack": "system"
+      //"route_exclude_address": ["10.0.0.0/24"]
+    }
+    // ,{
+    //   "type": "mixed",
+    //   "listen": "0.0.0.0",
+    //   "listen_port": 1080,
+    //   "users": [
+    //     {
+    //       "username": "123456",
+    //       "password": "123456"
+    //     }
+    //   ]
+    // }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "proxy",
+      "outbounds": [
+        "anytls",
+        "np",
+        "reality",
+        "hy",
+        "direct"
+      ]
+    },
+    {
+      "tag": "兜底",
+      "type": "selector",
+      "outbounds": ["proxy", "direct"]
+    },
+    {
+      "tag": "anytls",
+      "type": "anytls",
+      "server": "",
+      "server_port": ,
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": ""
+      }
+    },
+    {
+      "tag": "np",
+      "type": "naive",
+      "server": "",
+      "server_port": ,
+      "username": "",
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": ""
+      }
+    },
+    {
+      "tag": "hy",
+      "type": "hysteria2",
+      "server": "",
+      "server_port": ,
+      "up_mbps": 600,
+      "down_mbps": 1000,
+      "password": "",
+      "tls": {
+        "enabled": true,
+        "server_name": ""
+      }
+    },
+    {
+      "tag": "reality",
+      "type": "vless",
+      "server": "",
+      "server_port": ,
+      "uuid": "",
+      "flow": "xtls-rprx-vision",
+      "tls": {
+        "enabled": true,
+        "server_name": "",
+        "alpn": ["h2", "http/1.1"],
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "",
+          "short_id": ""
+        }
+      },
+      "packet_encoding": "xudp"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      { "action": "sniff" },
+      { "protocol": "dns", "action": "hijack-dns" },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "network": "udp",
+            "port": 443
+          },
+          {
+            "network": "tcp",
+            "port": 853
+          },
+          {
+            "protocol": "stun"
+          }
+        ],
+        "action": "reject"
+      },
+      { "clash_mode": "direct", "outbound": "direct" },
+      { "clash_mode": "global", "outbound": "proxy" },
+      // { "rule_set": ["ad"], "action": "reject" },
+      { "ip_is_private": true, "outbound": "direct" },
+      { "rule_set": ["github", "geolocation-!cn"], "outbound": "proxy" },
+      {
+        "rule_set": ["geoip-cn", "geosite-cn", "apple", "microsoft"],
+        "outbound": "direct"
+      },
+      { "clash_mode": "fakeip", "outbound": "proxy" }
+    ],
+    "rule_set": [
+      // {"tag": "ad", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adblocksingbox.srs", "download_detour": "proxy"},
+      {"tag": "geoip-cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/cn.srs","download_detour": "proxy"},
+      {"tag": "geosite-cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs","download_detour": "proxy"},
+      {"tag": "geolocation-!cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/geolocation-!cn.srs","download_detour": "proxy"},
+      {"tag": "apple","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/apple.srs","download_detour": "proxy"},
+      {"tag": "microsoft","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/microsoft.srs","download_detour": "proxy"},
+      {"tag": "github","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/github.srs","download_detour": "proxy"}
+    ],
+    "final": "兜底",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "dns_direct"
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "store_fakeip": true
+    },
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": "ui",
+      "secret": "123456",
+      "default_mode": "fakeip"
+    }
+  }
+}
