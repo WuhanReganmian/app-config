@@ -2,14 +2,13 @@
   "rules": [
     {
       "domain_suffix": [
-        "amazonaws.com",
-        "unity3d.com",
-        "naverncp.com",
-        "valofe.com",
-        "appsflyer.com",
-        "appsflyersdk.com",
-        "akamaized.net",
-        "neonapi.com"
+        "cdn-apple.com",
+        "apple.com",
+        "icloud.com",
+        "qq.com"
+      ],
+      "domain_keyword": [
+        "digitalchina"
       ]
     }
   ],
