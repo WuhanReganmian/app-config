@@ -35,7 +35,7 @@ DOMAIN-SUFFIX,cdn-apple.com,DIRECT
 DOMAIN-SUFFIX,icloud.com,DIRECT
 
 # 神户live
-host-keyword,liuniukeji,direct
+#host-keyword,liuniukeji,direct
 
 # 腾讯
 DOMAIN-SUFFIX,qq.com,DIRECT
