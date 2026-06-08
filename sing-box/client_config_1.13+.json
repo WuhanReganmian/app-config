@@ -35,7 +35,6 @@
       "address": ["172.18.0.1/30", "fdfe:dcba:9876::1/126"],
       "auto_route": true,
       "strict_route": true,
-      // win和安卓用system/mixed，ios用gvisor
       "stack": "system"
       //"route_exclude_address": ["10.0.0.0/24"]
     }
@@ -95,13 +94,19 @@
       "tag": "hy",
       "type": "hysteria2",
       "server": "",
-      "server_port": ,
+      //"server_port": ,
+      "server_ports": 1000-2000,
+      "hop_interval": "10s",
       "up_mbps": 600,
       "down_mbps": 1000,
       "password": "",
       "tls": {
         "enabled": true,
         "server_name": ""
+      },
+      "obfs": {
+        "type": "gecko",
+        "password": ""
       }
     },
     {
@@ -160,13 +165,14 @@
       { "ip_is_private": true, "outbound": "direct" },
       { "rule_set": ["github", "geolocation-!cn"], "outbound": "proxy" },
       {
-        "rule_set": ["geoip-cn", "geosite-cn", "apple", "microsoft"],
+        "rule_set": ["geoip-cn", "geosite-cn", "apple", "microsoft", "my-direct"],
         "outbound": "direct"
       },
       { "clash_mode": "fakeip", "outbound": "proxy" }
     ],
     "rule_set": [
       // {"tag": "ad", "type": "remote", "format": "binary", "url": "https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adblocksingbox.srs", "download_detour": "proxy"},
+      {"tag": "my-direct", "type": "remote", "format": "source", "url": "https://raw.githubusercontent.com/WuhanReganmian/app-config/refs/heads/main/Rules/direct.json", "download_detour": "proxy"},
       {"tag": "geoip-cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/cn.srs","download_detour": "proxy"},
       {"tag": "geosite-cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/cn.srs","download_detour": "proxy"},
       {"tag": "geolocation-!cn","type": "remote","format": "binary","url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geosite/geolocation-!cn.srs","download_detour": "proxy"},
