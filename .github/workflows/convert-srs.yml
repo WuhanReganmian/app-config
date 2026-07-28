@@ -1,0 +1,130 @@
+name: Auto Convert Multiple SRS
+
+on:
+  schedule:
+    # 每天北京时间早上 6 点执行
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python Dependencies
+        run: pip install requests pyyaml
+
+      - name: Fetch and Convert to JSON
+        run: |
+          python3 - <<'EOF'
+          import requests
+          import json
+          import yaml
+
+          # ================= 任务配置区 =================
+          # name: 生成的文件名 (无需加后缀，会自动生成 .json 和 .srs)
+          # url: TXT 或 YAML 规则的直链
+          # type: 规则的类型，可选 "domain_suffix" (域名) 或 "ip_cidr" (IP 地址)
+          TASKS = [
+              {
+                  "name": "my_domains",
+                  "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax_Domain.yaml",
+                  "type": "domain_suffix"
+              },
+              {
+                  "name": "my_ips",
+                  "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax_IP.yaml",
+                  "type": "ip_cidr"
+              }
+          ]
+          # ==============================================
+
+          for task in TASKS:
+              name = task["name"]
+              url = task["url"]
+              rule_type = task["type"]
+              print(f"Processing {name} from {url}...")
+              
+              try:
+                  response = requests.get(url, timeout=10)
+                  response.raise_for_status()
+                  content = response.text
+              except Exception as e:
+                  print(f"Failed to fetch {url}: {e}")
+                  continue # 如果下载失败，跳过这个任务继续下一个
+
+              items = []
+
+              # 解析 YAML 或 TXT
+              if 'payload:' in content or url.endswith(('.yaml', '.yml')):
+                  try:
+                      data = yaml.safe_load(content)
+                      if 'payload' in data:
+                          for rule in data['payload']:
+                              if isinstance(rule, str):
+                                  parts = rule.split(',')
+                                  if len(parts) >= 2:
+                                      items.append(parts[1].strip())
+                                  elif not rule.startswith('#') and ',' not in rule:
+                                      items.append(rule.lstrip('+.'))
+                  except Exception as e:
+                      print(f"Failed to parse YAML for {name}: {e}")
+                      continue
+              else:
+                  for line in content.splitlines():
+                      line = line.strip()
+                      if line and not line.startswith('#'):
+                          items.append(line)
+
+              # 构建 Sing-box JSON 结构
+              singbox_rule = {
+                  "version": 1,
+                  "rules": [
+                      {
+                          rule_type: items
+                      }
+                  ]
+              }
+
+              # 将生成的 JSON 写入当前目录
+              with open(f"{name}.json", 'w', encoding='utf-8') as f:
+                  json.dump(singbox_rule, f, indent=2)
+                  
+              print(f"Successfully converted {name}: {len(items)} rules.")
+          EOF
+
+      - name: Download Sing-box
+        run: |
+          LATEST_TAG=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep tag_name | cut -d '"' -f 4)
+          echo "Downloading Sing-box $LATEST_TAG..."
+          wget -qO sing-box.tar.gz "https://github.com/SagerNet/sing-box/releases/download/${LATEST_TAG}/sing-box-${LATEST_TAG#v}-linux-amd64.tar.gz"
+          tar -xzf sing-box.tar.gz
+          mv sing-box-*/sing-box ./sing-box
+          chmod +x sing-box
+
+      - name: Compile JSONs to SRS
+        run: |
+          # 遍历当前目录下刚刚生成的所有 .json 文件并批量编译
+          for file in *.json; do
+            if [ -f "$file" ]; then
+              filename=$(basename -- "$file")
+              name="${filename%.*}"
+              echo "Compiling $name.srs..."
+              ./sing-box rule-set compile "$file" -o "$name.srs"
+            fi
+          done
+
+      - name: Commit and Push SRS
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-update multiple SRS files"
+          # 匹配所有编译好的 srs 文件并提交
+          file_pattern: "*.srs"
