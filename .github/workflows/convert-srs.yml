@@ -28,24 +28,44 @@ jobs:
           import requests
           import json
           import yaml
+          import ipaddress
 
           # ================= 任务配置区 =================
-          # name: 生成的文件名 (无需加后缀，会自动生成 .json 和 .srs)
-          # url: TXT 或 YAML 规则的直链
-          # type: 规则的类型，可选 "domain_suffix" (域名) 或 "ip_cidr" (IP 地址)
           TASKS = [
               {
                   "name": "my_domains",
-                  "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax_Domain.yaml",
+                  "url": "https://raw.githubusercontent.com/example/proxy-domains.txt",
                   "type": "domain_suffix"
               },
               {
                   "name": "my_ips",
-                  "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax_IP.yaml",
+                  "url": "https://raw.githubusercontent.com/example/direct-ips.yaml",
                   "type": "ip_cidr"
               }
           ]
           # ==============================================
+
+          def clean_ip(item):
+              item = item.strip()
+              # 1. 尝试解析标准的 CIDR (如 1.1.1.1/32 或 10.0.0.0/8)
+              try:
+                  net = ipaddress.ip_network(item, strict=False)
+                  return str(net)
+              except ValueError:
+                  pass
+              
+              # 2. 如果是没有掩码的单独 IP (如 1.1.1.1)，自动补全掩码 /32 或 /128
+              try:
+                  ip = ipaddress.ip_address(item)
+                  if ip.version == 4:
+                      return f"{ip}/32"
+                  else:
+                      return f"{ip}/128"
+              except ValueError:
+                  pass
+              
+              # 3. 无法解析的非法字符串 (如 132203) 返回 None 丢弃
+              return None
 
           for task in TASKS:
               name = task["name"]
@@ -59,22 +79,22 @@ jobs:
                   content = response.text
               except Exception as e:
                   print(f"Failed to fetch {url}: {e}")
-                  continue # 如果下载失败，跳过这个任务继续下一个
+                  continue
 
-              items = []
+              raw_items = []
 
               # 解析 YAML 或 TXT
               if 'payload:' in content or url.endswith(('.yaml', '.yml')):
                   try:
                       data = yaml.safe_load(content)
-                      if 'payload' in data:
+                      if 'payload' in data and data['payload']:
                           for rule in data['payload']:
                               if isinstance(rule, str):
                                   parts = rule.split(',')
                                   if len(parts) >= 2:
-                                      items.append(parts[1].strip())
+                                      raw_items.append(parts[1].strip())
                                   elif not rule.startswith('#') and ',' not in rule:
-                                      items.append(rule.lstrip('+.'))
+                                      raw_items.append(rule.lstrip('+.'))
                   except Exception as e:
                       print(f"Failed to parse YAML for {name}: {e}")
                       continue
@@ -82,23 +102,34 @@ jobs:
                   for line in content.splitlines():
                       line = line.strip()
                       if line and not line.startswith('#'):
-                          items.append(line)
+                          raw_items.append(line)
 
-              # 构建 Sing-box JSON 结构
+              # 验证并清洗数据
+              valid_items = []
+              for item in raw_items:
+                  if rule_type == "ip_cidr":
+                      validated = clean_ip(item)
+                      if validated:
+                          valid_items.append(validated)
+                  else:
+                      # 域名类型直接保留非空行
+                      if item:
+                          valid_items.append(item)
+
               singbox_rule = {
                   "version": 1,
                   "rules": [
                       {
-                          rule_type: items
+                          rule_type: valid_items
                       }
                   ]
               }
 
-              # 将生成的 JSON 写入当前目录
               with open(f"{name}.json", 'w', encoding='utf-8') as f:
                   json.dump(singbox_rule, f, indent=2)
                   
-              print(f"Successfully converted {name}: {len(items)} rules.")
+              filtered_count = len(raw_items) - len(valid_items)
+              print(f"Successfully converted {name}: {len(valid_items)} valid rules (filtered {filtered_count} invalid lines).")
           EOF
 
       - name: Download Sing-box
