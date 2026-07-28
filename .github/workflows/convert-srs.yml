@@ -34,12 +34,12 @@ jobs:
           TASKS = [
               {
                   "name": "my_domains",
-                  "url": "https://raw.githubusercontent.com/example/proxy-domains.txt",
+                  "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax_Domain.yaml",
                   "type": "domain_suffix"
               },
               {
                   "name": "my_ips",
-                  "url": "https://raw.githubusercontent.com/example/direct-ips.yaml",
+                  "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax_IP.yaml",
                   "type": "ip_cidr"
               }
           ]
