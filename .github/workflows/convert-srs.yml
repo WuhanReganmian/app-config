@@ -107,18 +107,21 @@ jobs:
           echo "Downloading Sing-box $LATEST_TAG..."
           wget -qO sing-box.tar.gz "https://github.com/SagerNet/sing-box/releases/download/${LATEST_TAG}/sing-box-${LATEST_TAG#v}-linux-amd64.tar.gz"
           tar -xzf sing-box.tar.gz
-          mv sing-box-*/sing-box ./sing-box
-          chmod +x sing-box
+          
+          # 将可执行文件直接移动到系统 PATH 目录，避免与当前目录下的文件夹冲突
+          sudo mv sing-box-*/sing-box /usr/local/bin/sing-box
+          sudo chmod +x /usr/local/bin/sing-box
 
       - name: Compile JSONs to SRS
         run: |
-          # 遍历当前目录下刚刚生成的所有 .json 文件并批量编译
           for file in *.json; do
             if [ -f "$file" ]; then
               filename=$(basename -- "$file")
               name="${filename%.*}"
               echo "Compiling $name.srs..."
-              ./sing-box rule-set compile "$file" -o "$name.srs"
+              
+              # 直接使用全局命令 sing-box，无需加 ./
+              sing-box rule-set compile "$file" -o "$name.srs"
             fi
           done
 
