@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '请输入发布版本号/Tag (例如: v1.10.0-test)'
+        description: '请输入发布版本号/Tag (例如: v1.14.0-test)'
         required: true
-        default: 'v1.10.0-test'
+        default: 'v1.14.0-test'
 
 permissions:
   contents: write
 
 env:
   # 统一锁定 Go 版本并禁止自动下载其他工具链版本，彻底解决符号链接不一致问题
-  GO_VERSION: '1.24.x'
+  GO_VERSION: '1.26.x'
   GOTOOLCHAIN: 'local'
   BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_grpc"
 
