@@ -1,0 +1,144 @@
+name: Build Custom sing-box
+
+on:
+  workflow_dispatch:
+
+env:
+  # 对齐官方 testing 分支的编译版本
+  GO_VERSION: '1.22.x'
+  # 包含所有官方特性，外加 with_ebpf
+  BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_ech,with_utls,with_reality,with_clash_api,with_v2ray_api,with_grpc"
+
+jobs:
+  build-archlinux:
+    name: Build Arch Linux aarch64 Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sing-box remote
+        uses: actions/checkout@v4
+        with:
+          repository: SagerNet/sing-box # <-- 指定拉取远程核心仓库
+          ref: testing
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: Install CGO dependencies for eBPF
+        run: |
+          sudo apt-get update
+          # eBPF 必须通过 CGO 编译，这里提前准备 aarch64 的交叉编译器
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          # 安装 nfpm 用于无缝生成 .pkg.tar.zst 安装包
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+
+      - name: Compile linux_aarch64 with eBPF
+        run: |
+          # 开启 CGO_ENABLED=1 和 CC 环境变量是确保 bpf 模块能被编译进二进制的核心关键
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc \
+            go build -v -trimpath -tags "${{ env.BUILD_TAGS }}" -o build/sing-box ./cmd/sing-box
+
+      - name: Package into .pkg.tar.zst
+        run: |
+          export VERSION=$(git describe --tags --always | sed 's/^v//')
+          
+          cat << 'EOF' > nfpm.yaml
+          name: "sing-box"
+          arch: "aarch64"
+          platform: "linux"
+          version: "${VERSION}"
+          release: "1"
+          maintainer: "Custom Builder"
+          description: "The universal proxy platform (with eBPF)"
+          license: "GPL-3.0"
+          contents:
+            - src: "./build/sing-box"
+              dst: "/usr/bin/sing-box"
+              file_info:
+                mode: 0755
+          EOF
+          
+          ~/go/bin/nfpm pkg --packager archlinux --target sing-box-${VERSION}-1-aarch64.pkg.tar.zst
+
+      - name: Upload Arch Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: sing-box-linux-aarch64
+          path: "*.pkg.tar.zst"
+          retention-days: 7
+
+  build-android-apk:
+    name: Build Android v8a APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sing-box core
+        uses: actions/checkout@v4
+        with:
+          repository: SagerNet/sing-box # <-- 再次拉取底层核心
+          ref: testing
+          path: sing-box
+          fetch-depth: 0
+
+      - name: Checkout sing-box-for-android
+        uses: actions/checkout@v4
+        with:
+          repository: SagerNet/sing-box-for-android # <-- 拉取远程安卓 UI 仓库
+          path: sing-box-for-android
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          # NDK 包含了安卓所需的跨平台 CGO 编译链，无需额外装 gcc
+          ndk-version: r26d
+
+      - name: Compile libbox.aar (with_ebpf)
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          cd sing-box
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gobind@latest
+          gomobile init
+          
+          mkdir -p ../sing-box-for-android/app/libs
+          
+          # gomobile bind 会自动接管 CGO_ENABLED=1，直接生成包含 bpf 的核心库
+          gomobile bind -v -a -trimpath \
+            -target=android/arm64 \
+            -tags="${{ env.BUILD_TAGS }}" \
+            -o ../sing-box-for-android/app/libs/libbox.aar ./experimental/libbox
+
+      - name: Package APK
+        run: |
+          cd sing-box-for-android
+          # 禁用原生 gradle 里的 goBuild，使用我们上方手工编译好的 aar
+          sed -i 's/dependsOn "goBuild"//g' app/build.gradle 2>/dev/null || true
+          
+          chmod +x ./gradlew
+          ./gradlew clean
+          ./gradlew assemblePlayDebug -PtargetAbi=arm64-v8a || ./gradlew assembleDebug -PtargetAbi=arm64-v8a
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sing-box-v8a-ebpf-test
+          path: sing-box-for-android/app/build/outputs/apk/**/*.apk
+          retention-days: 7
