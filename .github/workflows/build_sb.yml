@@ -14,12 +14,11 @@ permissions:
 env:
   GO_VERSION: '1.26.x'
   GOTOOLCHAIN: 'local'
-  # 统一为 Linux 编译所需的完整 Tags（包含 eBPF）
   BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_grpc"
 
 jobs:
   build-archlinux:
-    name: Build Arch Linux aarch64 Package
+    name: Build Arch Linux x86_64 Package
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sing-box remote
@@ -35,15 +34,15 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           check-latest: true
 
-      - name: Install CGO dependencies for eBPF
+      - name: Install NFPM
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
+          # 因为是 x86_64 编译 x86_64，不再需要安装 gcc-aarch64-linux-gnu
           go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
 
-      - name: Compile linux_aarch64 with eBPF
+      - name: Compile linux_x86_64 with eBPF
         run: |
-          GOOS=linux GOARCH=arm64 CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc \
+          # 修正为 amd64 (x86_64)，使用默认环境的 gcc 即可
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 \
             go build -v -trimpath -tags "${{ env.BUILD_TAGS }}" -o build/sing-box ./cmd/sing-box
 
       - name: Package into .pkg.tar.zst
@@ -53,7 +52,7 @@ jobs:
           
           cat << 'EOF' > nfpm.yaml
           name: "sing-box"
-          arch: "aarch64"
+          arch: "x86_64"     # 架构修改为 Arch Linux 电脑端标准的 x86_64
           platform: "linux"
           version: "${VERSION}"
           release: "1"
@@ -67,12 +66,13 @@ jobs:
                 mode: 0755
           EOF
           
-          ~/go/bin/nfpm pkg --packager archlinux --target sing-box-${VERSION}-1-aarch64.pkg.tar.zst
+          # 输出目标修改为 x86_64
+          ~/go/bin/nfpm pkg --packager archlinux --target sing-box-${VERSION}-1-x86_64.pkg.tar.zst
 
       - name: Upload Arch Package Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sing-box-linux-aarch64
+          name: sing-box-linux-x86_64
           path: "*.pkg.tar.zst"
           retention-days: 1
 
@@ -94,6 +94,7 @@ jobs:
           body: |
             ### 编译说明
             - 核心分支：`SagerNet/sing-box@testing`
+            - 架构：`x86_64` (Intel/AMD PC)
             - 特性支持：`${{ env.BUILD_TAGS }}`
             - 版本：`${{ inputs.version }}`
           prerelease: true
