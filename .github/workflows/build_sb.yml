@@ -4,15 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '请输入发布版本号/Tag (例如: v1.14.0-test)'
+        description: '请输入发布版本号/Tag (例如: v1.10.0-test)'
         required: true
-        default: 'v1.14.0-test'
+        default: 'v1.10.0-test'
 
 permissions:
   contents: write
 
 env:
-  # 统一锁定 Go 版本并禁止自动下载其他工具链版本，彻底解决符号链接不一致问题
   GO_VERSION: '1.26.x'
   GOTOOLCHAIN: 'local'
   BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_grpc"
@@ -120,15 +119,21 @@ jobs:
         run: |
           cd sing-box
           
-          # 仅全局安装工具，不修改当前 module 的 go.mod 文件
+          # 1. 显式在当前模块的 go.mod 中注册工具依赖
+          go get -tool golang.org/x/mobile/cmd/gomobile
+          go get -tool golang.org/x/mobile/cmd/gobind
+          
+          # 2. 安装 gomobile 二进制文件到系统环境
           go install golang.org/x/mobile/cmd/gomobile@latest
           go install golang.org/x/mobile/cmd/gobind@latest
+          
+          # 3. 整理模块依赖，防止多余或缺失的依赖报错
+          go mod tidy
           
           gomobile init
           
           mkdir -p ../sing-box-for-android/app/libs
           
-          # 指定 -androidapi 34 编译
           gomobile bind -v -a -trimpath \
             -target=android/arm64 \
             -androidapi 34 \
