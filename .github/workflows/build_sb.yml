@@ -12,7 +12,9 @@ permissions:
   contents: write
 
 env:
-  GO_VERSION: '1.25.x'
+  # 统一锁定 Go 版本并禁止自动下载其他工具链版本，彻底解决符号链接不一致问题
+  GO_VERSION: '1.24.x'
+  GOTOOLCHAIN: 'local'
   BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_grpc"
 
 jobs:
@@ -46,7 +48,6 @@ jobs:
 
       - name: Package into .pkg.tar.zst
         run: |
-          # 提取手动输入的版本号，并去除 v 前缀以符合 pacman 规范
           RAW_VERSION="${{ inputs.version }}"
           export VERSION=$(echo "${RAW_VERSION}" | sed 's/^v//')
           
@@ -119,15 +120,15 @@ jobs:
         run: |
           cd sing-box
           
+          # 仅全局安装工具，不修改当前 module 的 go.mod 文件
           go install golang.org/x/mobile/cmd/gomobile@latest
           go install golang.org/x/mobile/cmd/gobind@latest
-          go get -tool golang.org/x/mobile/cmd/gobind
-          go get -tool golang.org/x/mobile/cmd/gomobile
           
           gomobile init
           
           mkdir -p ../sing-box-for-android/app/libs
           
+          # 指定 -androidapi 34 编译
           gomobile bind -v -a -trimpath \
             -target=android/arm64 \
             -androidapi 34 \
