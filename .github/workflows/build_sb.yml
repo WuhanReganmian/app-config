@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '请输入发布版本号/Tag (例如: v1.10.0-test)'
+        description: '请输入发布版本号/Tag (例如: v1.14.0-test)'
         required: true
-        default: 'v1.10.0-test'
+        default: 'v1.14.0-test'
 
 permissions:
   contents: write
@@ -14,6 +14,7 @@ permissions:
 env:
   GO_VERSION: '1.26.x'
   GOTOOLCHAIN: 'local'
+  # 统一为 Linux 编译所需的完整 Tags（包含 eBPF）
   BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_grpc"
 
 jobs:
@@ -75,90 +76,9 @@ jobs:
           path: "*.pkg.tar.zst"
           retention-days: 1
 
-  build-android-apk:
-    name: Build Android v8a APK
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sing-box core
-        uses: actions/checkout@v4
-        with:
-          repository: SagerNet/sing-box
-          ref: testing
-          path: sing-box
-          fetch-depth: 0
-
-      - name: Checkout sing-box-for-android
-        uses: actions/checkout@v4
-        with:
-          repository: SagerNet/sing-box-for-android
-          path: sing-box-for-android
-          fetch-depth: 0
-          submodules: recursive
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-
-      - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r26d
-
-      - name: Compile libbox.aar (with_ebpf)
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: |
-          cd sing-box
-          
-          # 1. 显式在当前模块的 go.mod 中注册工具依赖
-          go get -tool golang.org/x/mobile/cmd/gomobile
-          go get -tool golang.org/x/mobile/cmd/gobind
-          
-          # 2. 安装 gomobile 二进制文件到系统环境
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          go install golang.org/x/mobile/cmd/gobind@latest
-          
-          # 3. 整理模块依赖，防止多余或缺失的依赖报错
-          go mod tidy
-          
-          gomobile init
-          
-          mkdir -p ../sing-box-for-android/app/libs
-          
-          gomobile bind -v -a -trimpath \
-            -target=android/arm64 \
-            -androidapi 34 \
-            -tags="${{ env.BUILD_TAGS }}" \
-            -o ../sing-box-for-android/app/libs/libbox.aar ./experimental/libbox
-
-      - name: Package APK
-        run: |
-          cd sing-box-for-android
-          sed -i 's/dependsOn "goBuild"//g' app/build.gradle 2>/dev/null || true
-          
-          chmod +x ./gradlew
-          ./gradlew clean
-          ./gradlew assemblePlayDebug -PtargetAbi=arm64-v8a || ./gradlew assembleDebug -PtargetAbi=arm64-v8a
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sing-box-v8a-ebpf-test
-          path: sing-box-for-android/app/build/outputs/apk/**/*.apk
-          retention-days: 1
-
   publish-release:
     name: Publish to GitHub Releases
-    needs: [build-archlinux, build-android-apk]
+    needs: [build-archlinux]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -174,9 +94,8 @@ jobs:
           body: |
             ### 编译说明
             - 核心分支：`SagerNet/sing-box@testing`
-            - 编译 Tags：`${{ env.BUILD_TAGS }}`
+            - 特性支持：`${{ env.BUILD_TAGS }}`
             - 版本：`${{ inputs.version }}`
           prerelease: true
           files: |
             artifacts/**/*.pkg.tar.zst
-            artifacts/**/*.apk
