@@ -1,13 +1,19 @@
-name: Build Custom sing-box (Fixed)
+name: Build Custom sing-box & Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: '请输入发布版本号/Tag (例如: v1.10.0-test)'
+        required: true
+        default: 'v1.10.0-test'
+
+permissions:
+  contents: write
 
 env:
-  # 对齐当前代码所需的较新 Go 版本
   GO_VERSION: '1.25.x'
-  # 移除了已废弃的 with_ech，保留其余特性并加入 with_ebpf
-  BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_v2ray_api,with_grpc"
+  BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_grpc"
 
 jobs:
   build-archlinux:
@@ -40,7 +46,9 @@ jobs:
 
       - name: Package into .pkg.tar.zst
         run: |
-          export VERSION=$(git describe --tags --always | sed 's/^v//')
+          # 提取手动输入的版本号，并去除 v 前缀以符合 pacman 规范
+          RAW_VERSION="${{ inputs.version }}"
+          export VERSION=$(echo "${RAW_VERSION}" | sed 's/^v//')
           
           cat << 'EOF' > nfpm.yaml
           name: "sing-box"
@@ -60,12 +68,12 @@ jobs:
           
           ~/go/bin/nfpm pkg --packager archlinux --target sing-box-${VERSION}-1-aarch64.pkg.tar.zst
 
-      - name: Upload Arch Package
+      - name: Upload Arch Package Artifact
         uses: actions/upload-artifact@v4
         with:
           name: sing-box-linux-aarch64
           path: "*.pkg.tar.zst"
-          retention-days: 7
+          retention-days: 1
 
   build-android-apk:
     name: Build Android v8a APK
@@ -111,7 +119,6 @@ jobs:
         run: |
           cd sing-box
           
-          # 修复 gomobile 报错：显式安装工具链并在 go.mod 中注册 tool 依赖
           go install golang.org/x/mobile/cmd/gomobile@latest
           go install golang.org/x/mobile/cmd/gobind@latest
           go get -tool golang.org/x/mobile/cmd/gobind
@@ -123,6 +130,7 @@ jobs:
           
           gomobile bind -v -a -trimpath \
             -target=android/arm64 \
+            -androidapi 34 \
             -tags="${{ env.BUILD_TAGS }}" \
             -o ../sing-box-for-android/app/libs/libbox.aar ./experimental/libbox
 
@@ -135,9 +143,34 @@ jobs:
           ./gradlew clean
           ./gradlew assemblePlayDebug -PtargetAbi=arm64-v8a || ./gradlew assembleDebug -PtargetAbi=arm64-v8a
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: sing-box-v8a-ebpf-test
           path: sing-box-for-android/app/build/outputs/apk/**/*.apk
-          retention-days: 7
+          retention-days: 1
+
+  publish-release:
+    name: Publish to GitHub Releases
+    needs: [build-archlinux, build-android-apk]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: "sing-box ${{ inputs.version }}"
+          body: |
+            ### 编译说明
+            - 核心分支：`SagerNet/sing-box@testing`
+            - 编译 Tags：`${{ env.BUILD_TAGS }}`
+            - 版本：`${{ inputs.version }}`
+          prerelease: true
+          files: |
+            artifacts/**/*.pkg.tar.zst
+            artifacts/**/*.apk
