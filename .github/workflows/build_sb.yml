@@ -1,13 +1,13 @@
-name: Build Custom sing-box
+name: Build Custom sing-box (Fixed)
 
 on:
   workflow_dispatch:
 
 env:
-  # 对齐官方 testing 分支的编译版本
-  GO_VERSION: '1.22.x'
-  # 包含所有官方特性，外加 with_ebpf
-  BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_ech,with_utls,with_reality,with_clash_api,with_v2ray_api,with_grpc"
+  # 对齐当前代码所需的较新 Go 版本
+  GO_VERSION: '1.25.x'
+  # 移除了已废弃的 with_ech，保留其余特性并加入 with_ebpf
+  BUILD_TAGS: "with_ebpf,with_quic,with_dhcp,with_wireguard,with_utls,with_reality,with_clash_api,with_v2ray_api,with_grpc"
 
 jobs:
   build-archlinux:
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout sing-box remote
         uses: actions/checkout@v4
         with:
-          repository: SagerNet/sing-box # <-- 指定拉取远程核心仓库
+          repository: SagerNet/sing-box
           ref: testing
           fetch-depth: 0
 
@@ -30,14 +30,11 @@ jobs:
       - name: Install CGO dependencies for eBPF
         run: |
           sudo apt-get update
-          # eBPF 必须通过 CGO 编译，这里提前准备 aarch64 的交叉编译器
           sudo apt-get install -y gcc-aarch64-linux-gnu
-          # 安装 nfpm 用于无缝生成 .pkg.tar.zst 安装包
           go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
 
       - name: Compile linux_aarch64 with eBPF
         run: |
-          # 开启 CGO_ENABLED=1 和 CC 环境变量是确保 bpf 模块能被编译进二进制的核心关键
           GOOS=linux GOARCH=arm64 CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc \
             go build -v -trimpath -tags "${{ env.BUILD_TAGS }}" -o build/sing-box ./cmd/sing-box
 
@@ -77,7 +74,7 @@ jobs:
       - name: Checkout sing-box core
         uses: actions/checkout@v4
         with:
-          repository: SagerNet/sing-box # <-- 再次拉取底层核心
+          repository: SagerNet/sing-box
           ref: testing
           path: sing-box
           fetch-depth: 0
@@ -85,7 +82,7 @@ jobs:
       - name: Checkout sing-box-for-android
         uses: actions/checkout@v4
         with:
-          repository: SagerNet/sing-box-for-android # <-- 拉取远程安卓 UI 仓库
+          repository: SagerNet/sing-box-for-android
           path: sing-box-for-android
           fetch-depth: 0
           submodules: recursive
@@ -106,7 +103,6 @@ jobs:
         uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          # NDK 包含了安卓所需的跨平台 CGO 编译链，无需额外装 gcc
           ndk-version: r26d
 
       - name: Compile libbox.aar (with_ebpf)
@@ -114,13 +110,17 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           cd sing-box
+          
+          # 修复 gomobile 报错：显式安装工具链并在 go.mod 中注册 tool 依赖
           go install golang.org/x/mobile/cmd/gomobile@latest
           go install golang.org/x/mobile/cmd/gobind@latest
+          go get -tool golang.org/x/mobile/cmd/gobind
+          go get -tool golang.org/x/mobile/cmd/gomobile
+          
           gomobile init
           
           mkdir -p ../sing-box-for-android/app/libs
           
-          # gomobile bind 会自动接管 CGO_ENABLED=1，直接生成包含 bpf 的核心库
           gomobile bind -v -a -trimpath \
             -target=android/arm64 \
             -tags="${{ env.BUILD_TAGS }}" \
@@ -129,7 +129,6 @@ jobs:
       - name: Package APK
         run: |
           cd sing-box-for-android
-          # 禁用原生 gradle 里的 goBuild，使用我们上方手工编译好的 aar
           sed -i 's/dependsOn "goBuild"//g' app/build.gradle 2>/dev/null || true
           
           chmod +x ./gradlew
