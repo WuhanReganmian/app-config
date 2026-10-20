@@ -1,5 +1,9 @@
 # 自用qx直连
 
+# 飞书
+DOMAIN-KEYWORD,feishu,DIRECT
+DOMAIN-KEYWORD,feishucdn,DIRECT
+
 # fcm
 #DOMAIN,alt1-mtalk.google.com,DIRECT
 #DOMAIN,alt2-mtalk.google.com,DIRECT
